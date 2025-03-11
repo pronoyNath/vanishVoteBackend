@@ -32,18 +32,18 @@ const Poll = mongoose.model("Poll", pollSchema);
 // Routes
 app.post("/api/polls", async (req, res) => {
   console.log("Request Body:", req.body); // Debug: Log the request body
-  const { question, options, expiresIn } = req.body;
+  const { question, options, expiresIn, showResults } = req.body;
 
-  if (!question || !options || !expiresIn) {
+  if (!question || !options || !expiresIn || !showResults) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // const expiresAt = new Date(Date.now() + expiresIn * 60 * 60 * 1000); // Convert hours to milliseconds
-    const expiresAt = new Date(Date.now() + 10 * 1000); // 10 sec = 10 * 1000 ms
+    const expiresAt = new Date(Date.now() + expiresIn * 60 * 60 * 1000); // Convert hours to milliseconds
+    // const expiresAt = new Date(Date.now() + 10 * 1000); // 10 sec = 10 * 1000 ms
 
-    
-    const poll = new Poll({ question, options, expiresAt });
+
+    const poll = new Poll({ question, options,showResults, expiresAt });
     await poll.save();
     console.log("Poll saved:", poll); // Debug: Log the saved poll
     res.json({ id: poll._id, link: `http://localhost:3000/poll/${poll._id}` });
@@ -87,19 +87,19 @@ app.post("/api/polls/:id/vote", async (req, res) => {
   res.json({ success: true });
 });
 app.post("/api/polls/:id/react", async (req, res) => {
-    const { reaction } = req.body; // Reaction type (e.g., "🔥", "👍")
-    const poll = await Poll.findById(req.params.id);
-  
-    if (!poll || poll.expiresAt < new Date()) {
-      return res.status(404).json({ error: "Poll not found or expired" });
-    }
-  
-    // Increment the reaction count
-    poll.reactions.set(reaction, (poll.reactions.get(reaction) || 0) + 1);
-    await poll.save();
-  
-    res.json({ success: true, reactions: Object.fromEntries(poll.reactions) });
-  });
+  const { reaction } = req.body; // Reaction type (e.g., "🔥", "👍")
+  const poll = await Poll.findById(req.params.id);
+
+  if (!poll || poll.expiresAt < new Date()) {
+    return res.status(404).json({ error: "Poll not found or expired" });
+  }
+
+  // Increment the reaction count
+  poll.reactions.set(reaction, (poll.reactions.get(reaction) || 0) + 1);
+  await poll.save();
+
+  res.json({ success: true, reactions: Object.fromEntries(poll.reactions) });
+});
 
 
 
