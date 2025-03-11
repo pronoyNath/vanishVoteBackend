@@ -17,14 +17,15 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Poll Schema
 const pollSchema = new mongoose.Schema({
-    question: String,
-    options: [String],
-    votes: { type: Map, of: Number, default: {} },
-    reactions: { type: Map, of: Number, default: {} }, // Store reactions
-    expiresAt: Date,
-    isPublic: { type: Boolean, default: true },
-    createdAt: { type: Date, default: Date.now },
-  });
+  question: String,
+  options: [String],
+  votes: { type: Map, of: Number, default: {} },
+  reactions: { type: Map, of: Number, default: {} },
+  expiresAt: Date,
+  isPublic: { type: Boolean, default: true },
+  showResults: { type: String, enum: ["hide", "show"], default: "hide" }, // Add this field
+  createdAt: { type: Date, default: Date.now },
+});
 
 const Poll = mongoose.model("Poll", pollSchema);
 
@@ -41,6 +42,7 @@ app.post("/api/polls", async (req, res) => {
     // const expiresAt = new Date(Date.now() + expiresIn * 60 * 60 * 1000); // Convert hours to milliseconds
     const expiresAt = new Date(Date.now() + 10 * 1000); // 10 sec = 10 * 1000 ms
 
+    
     const poll = new Poll({ question, options, expiresAt });
     await poll.save();
     console.log("Poll saved:", poll); // Debug: Log the saved poll
