@@ -72,7 +72,7 @@ app.get("/api/polls/:id", async (req, res) => {
   }
 });
 app.get("/", async (req, res) => {
-  const x = "hello";
+  const x = "hello WORLD";
   res.send(x)
 });
 
